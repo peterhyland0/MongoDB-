@@ -1,0 +1,197 @@
+db.STUDENT.insertMany([
+    {Student_number: 121365693, Name: "Peter Hyland", Class: 1, Major: "CS" },
+    {Student_number: 23485393, Name: "Tony Brown", Class: 2, Major: "CS" },
+    {Student_number: 87646381, Name: "Eilis O'Brien", Class: 3, Major: "Medical" }
+])
+
+db.COURSE.insertMany([
+    {Course_name: "Introduction to Relational Databases", Course_number: "CS1106", Credit_hours: 4, Department:"CS"},
+    {Course_name: "Data Structures", Course_number: "CS3320", Credit_hours: 4, Department:"CS"},
+    {Course_name: "Discrete Mathematics", Course_number: "MATH2410", Credit_hours: 3, Department:"MATH"},
+    {Course_name: "Information Storage & Management I", Course_number: "CS2208", Credit_hours: 3, Department:"CS"}
+])
+
+db.TERM.insertMany([
+    {Term_identifier:85,Course_number:"MATH2410", Semester:"Fall", Year:2020,Instructor:"King"},
+    {Term_identifier:92,Course_number:"CS1106", Semester:"Fall", Year:2020,Instructor:"Anderson"},
+    {Term_identifier:102,Course_number:"CS3320", Semester:"Spring", Year:2021,Instructor:"Knuth"},
+    {Term_identifier:112,Course_number:"MATH2410", Semester:"Fall", Year:2021,Instructor:"Chang"},
+    {Term_identifier:119,Course_number:"CS1106", Semester:"Fall", Year:2021,Instructor:"Anderson"},
+    {Term_identifier:135,Course_number:"CS2208", Semester:"Fall", Year:2022,Instructor:"Stone"}
+    
+])
+
+db.GRADE_REPORT.insertMany([
+    {Student_number: 121365693,Term_identifier:119,Grade:"A"},
+    {Student_number: 121365693,Term_identifier:135,Grade:"A"},
+    {Student_number: 23485393,Term_identifier:102,Grade:"A"},
+    {Student_number: 23485393,Term_identifier:85,Grade:"A"},
+    {Student_number: 87646381,Term_identifier:92,Grade:"B"},
+    {Student_number: 87646381,Term_identifier:135,Grade:"A"}
+])
+
+
+db.PREQUISITE.insertMany([
+    {Course_number: "CS3320", Prequisite_number:"MATH2410"},
+    {Course_number: "CS2208", Prequisite_number:"CS1106"}
+])
+
+
+db.GRADE_REPORT.aggregate([
+  {
+    $lookup:
+      {
+        from: "TERM",
+        localField: "Term_identifier",
+        foreignField: "Term_identifier",
+        as: "Term_info"
+      }
+  },
+  {
+    $unwind: "$Term_info"
+
+  },
+    {
+    $lookup:
+      {
+        from: "STUDENT",
+        localField: "Student_number",
+        foreignField: "Student_number",
+        as: "Student_info"
+      }
+  },
+  {
+    $lookup:
+      {
+        from: "COURSE",
+        localField: "Term_info.Course_number",
+        foreignField: "Course_number",
+        as: "Course_info"
+      }
+  },
+    {
+    $match: {"Course_info.Course_name":"Information Storage & Management I",
+    "Term_info.Semester":"Fall"}
+  
+  },
+
+ 
+  {
+    $project:
+      {
+        _id: 0,
+        Name: "$Student_info.Name",
+        Grade: "$Grade",
+        
+      }
+  }
+])
+db.GRADE_REPORT.aggregate([
+  {
+    $lookup:
+      {
+        from: "TERM",
+        localField: "Term_identifier",
+        foreignField: "Term_identifier",
+        as: "Term_info"
+      }
+  },
+    {
+    $lookup:
+      {
+        from: "STUDENT",
+        localField: "Student_number",
+        foreignField: "Student_number",
+        as: "Student_info"
+      }
+  },
+  {
+    $lookup:
+      {
+        from: "COURSE",
+        localField: "Term_info.Course_number",
+        foreignField: "Course_number",
+        as: "Course_info"
+      }
+  },
+  
+
+  {
+    $match: {"Student_info.Name": "Tony Brown"}
+  },
+  
+ 
+  {
+    $project:
+      {
+        _id: 0,
+        Name: "$Student_info.Name",
+        Course: "$Course_info.Course_name",
+        Grade: "$Grade",
+        
+      }
+  }
+])
+
+
+//Question 3. Write a MongoDB query to retrieve the names of the students 
+//that took “Information Storage & Management I” course oﬀered in fall 
+//2022 and their grades in that term. And show the output of your query.
+{ $and: [{"Course_info.Course_name": "Information Storage & Management I"},
+                    {"Term_info.Semester":"Fall"},
+                    {"Term_info.Year":"2022"}]}
+
+          
+  {
+    $match: {"Course_info.Course_name":"Information Storage & Management I",
+                    "Term_info.Semester":"Fall",
+                    "Term_info.Year":"2022"}
+  
+  },
+  
+  Question 4. Write a MongoDB query to retrieve the Course_name of 
+  the prerequisites of the “Information Storage & Management I” course.
+
+db.COURSE.aggregate([
+  {
+    $lookup: {
+      from: "PREQUISITE",
+      localField: "Course_number",
+      foreignField: "Course_number",
+      as: "prerequisite_info"
+    }
+  },
+  {
+    $match: {
+      "Course_name": "Information Storage & Management I"
+    }
+  },
+  {
+    $unwind: "$prerequisite_info"
+  },
+  {
+    $lookup: {
+      from: "COURSE",
+      localField: "prerequisite_info.Prequisite_number",
+      foreignField: "Course_number",
+      as: "prerequisite_course"
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      "Prerequisite Course Name": "$prerequisite_course.Course_name"
+    }
+  }
+])
+This code will lookup the PREQUISITE collection for each course to find its prerequisite(s), and then return the name(s) of the prerequisite(s) for the "Information Storage & Management I" course.
+
+
+
+
+
+
+
+
+
+
