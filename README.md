@@ -1,5 +1,5 @@
 # MongoDB
-#University Database MongoDB Code
+# University Database MongoDB Code
 This repository contains MongoDB code snippets for managing a university database. The code demonstrates various operations such as data insertion, data retrieval, and data aggregation within MongoDB. Below is a breakdown of each section of the code:
 
 ## 1. Data Insertion
