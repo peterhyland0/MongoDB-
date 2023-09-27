@@ -137,6 +137,7 @@ db.GRADE_REPORT.aggregate([
 //Question 3. Write a MongoDB query to retrieve the names of the students 
 //that took “Information Storage & Management I” course oﬀered in fall 
 //2022 and their grades in that term. And show the output of your query.
+
 { $and: [{"Course_info.Course_name": "Information Storage & Management I"},
                     {"Term_info.Semester":"Fall"},
                     {"Term_info.Year":"2022"}]}
